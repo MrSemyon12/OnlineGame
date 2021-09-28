@@ -1,4 +1,5 @@
 import pygame
+from network import Network
 
 win_width = 500
 win_height = 500
@@ -35,30 +36,50 @@ class Player:
         if keys[pygame.K_DOWN]:
             self.y += self.step
 
+        self.update()
+
+    def update(self):
         self.circle = ((self.x, self.y), self.radius)
 
 
-def redraw_window(window, player):
+def read_pos(str):
+    str = str.split(",")
+    return int(str[0]), int(str[1])
+
+
+def make_pos(tup):
+    return str(tup[0]) + "," + str(tup[1])
+
+
+def redraw_window(window, player, player2):
     window.fill((255, 255, 255))
     player.draw(window)
+    player2.draw(window)
     pygame.display.update()
 
 
 def main():
     run = True
-    p = Player(50, 50, 50, (0, 255, 0))
+    n = Network()
+    start_pos = read_pos(n.get_pos())
+    p = Player(start_pos[0], start_pos[1], 50, (0, 255, 0))
+    p2 = Player(0, 0, 50, (255, 0, 0))
     clock = pygame.time.Clock()
 
     while run:
-
         clock.tick(60)
+        p2Pos = read_pos(n.send(make_pos((p.x, p.y))))
+        p2.x = p2Pos[0]
+        p2.y = p2Pos[1]
+        p2.update()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
                 pygame.quit()
 
         p.move()
-        redraw_window(win, p)
+        redraw_window(win, p, p2)
 
 
 main()
