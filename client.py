@@ -1,54 +1,11 @@
 import pygame
 from network import Network
+from player import Player
 
 win_width = 500
 win_height = 500
 win = pygame.display.set_mode((win_width, win_height))
 pygame.display.set_caption("client")
-
-clientNumber = 0
-
-
-class Player:
-    def __init__(self, x, y, radius, color):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.color = color
-        self.circle = ((x, y), radius)
-        self.step = 3
-
-    def draw(self, window):
-        pygame.draw.circle(window, self.color, *self.circle)
-
-    def move(self):
-        keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_LEFT]:
-            self.x -= self.step
-
-        if keys[pygame.K_RIGHT]:
-            self.x += self.step
-
-        if keys[pygame.K_UP]:
-            self.y -= self.step
-
-        if keys[pygame.K_DOWN]:
-            self.y += self.step
-
-        self.update()
-
-    def update(self):
-        self.circle = ((self.x, self.y), self.radius)
-
-
-def read_pos(str):
-    str = str.split(",")
-    return int(str[0]), int(str[1])
-
-
-def make_pos(tup):
-    return str(tup[0]) + "," + str(tup[1])
 
 
 def redraw_window(window, player, player2):
@@ -61,17 +18,12 @@ def redraw_window(window, player, player2):
 def main():
     run = True
     n = Network()
-    start_pos = read_pos(n.get_pos())
-    p = Player(start_pos[0], start_pos[1], 50, (0, 255, 0))
-    p2 = Player(0, 0, 50, (255, 0, 0))
+    p = n.get_p()
     clock = pygame.time.Clock()
 
     while run:
         clock.tick(60)
-        p2Pos = read_pos(n.send(make_pos((p.x, p.y))))
-        p2.x = p2Pos[0]
-        p2.y = p2Pos[1]
-        p2.update()
+        p2 = n.send(p)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
